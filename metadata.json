@@ -1,0 +1,8 @@
+{
+  "owner": "cypress-io",
+  "name": "github-action",
+  "alias": "cypress-io-github-action",
+  "visibility": "private",
+  "description": "GitHub Action for running Cypress end-to-end \u0026 component tests",
+  "block_publish": false
+}
