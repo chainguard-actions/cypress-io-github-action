@@ -8,7 +8,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 
 | Version | Tag | Upstream commit |
 |---------|-----|-----------------|
-| v7.1.9 | [`v7.1.9`](https://github.com/chainguard-actions/cypress-io-github-action/tree/v7.1.9) | — |
+| v7.1.9 | [`v7.1.9`](https://github.com/chainguard-actions/cypress-io--github-action/tree/v7.1.9) | — |
 
 ## Privacy
 
