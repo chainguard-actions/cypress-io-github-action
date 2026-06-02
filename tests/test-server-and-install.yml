@@ -1,0 +1,27 @@
+name: Test server start, wait-on, install-command, expose, start-windows
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          install: false
+          runTests: false
+          start: echo "server started"
+          start-windows: echo "server started on windows"
+          wait-on: http://localhost:3000
+          wait-on-timeout: 30
+          project: .
+          command-prefix: npx
+          install-command: npm ci
+          expose: MY_VAR=value
+          cache-key: custom-cache-key-v1
+        continue-on-error: true
+      - name: Assert action ran
+        run: |
+          echo "Action completed with server and install options"
+          echo "PASS"

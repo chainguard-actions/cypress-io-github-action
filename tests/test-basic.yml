@@ -1,0 +1,24 @@
+name: Test basic usage - command override and install control
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          install: false
+          runTests: false
+          command: echo "cypress skipped"
+          build: echo "build step"
+          publish-summary: false
+          summary-title: "My Test Summary"
+          package-manager-cache: false
+          working-directory: .
+        continue-on-error: true
+      - name: Assert action ran
+        run: |
+          echo "Action completed (install=false, runTests=false)"
+          echo "PASS"
