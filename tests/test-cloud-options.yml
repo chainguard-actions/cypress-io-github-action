@@ -1,4 +1,4 @@
-name: Test basic inputs
+name: Test cloud recording inputs
 on:
   workflow_dispatch:
 jobs:
@@ -11,11 +11,12 @@ jobs:
         with:
           install: false
           runTests: false
-          working-directory: .
-          build: echo build-step
-          publish-summary: false
-          summary-title: "My Test Summary"
-          command: echo cypress-run
+          record: false
+          group: my-group
+          tag: my-tag
+          parallel: false
+          ci-build-id: build-123
+          auto-cancel-after-failures: 5
       - name: Assert action completed
         run: |
           echo "Action completed successfully"

@@ -1,4 +1,4 @@
-name: Test basic inputs
+name: Test run options inputs
 on:
   workflow_dispatch:
 jobs:
@@ -11,11 +11,13 @@ jobs:
         with:
           install: false
           runTests: false
-          working-directory: .
-          build: echo build-step
-          publish-summary: false
-          summary-title: "My Test Summary"
-          command: echo cypress-run
+          browser: chrome
+          spec: cypress/e2e/**/*.cy.js
+          config: baseUrl=http://localhost:3000
+          config-file: cypress.config.js
+          env: FOO=bar
+          headed: false
+          quiet: true
       - name: Assert action completed
         run: |
           echo "Action completed successfully"
