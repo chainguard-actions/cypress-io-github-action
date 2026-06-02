@@ -1,6 +1,6 @@
 # cypress-io/github-action
 
-GitHub Action for running Cypress end-to-end & component tests
+GitHub Action for running Cypress end-to-end and component tests
 
 Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at [https://github.com/cypress-io/github-action](https://github.com/cypress-io/github-action).
 
