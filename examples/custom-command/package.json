@@ -1,0 +1,16 @@
+{
+  "name": "example-custom-command",
+  "version": "2.0.0",
+  "description": "Run your own test command instead of Cypress",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "cypress run",
+    "custom-test": "node ."
+  },
+  "private": true,
+  "devDependencies": {
+    "cypress": "15.13.0",
+    "lodash": "^4.17.23"
+  }
+}

@@ -1,0 +1,11 @@
+0 verbose cli /usr/bin/node /usr/bin/npm
+1 info using npm@11.16.0
+2 info using node@v26.3.0
+3 silly config load:file:/usr/lib/node_modules/npm/npmrc
+4 silly config load:file:/tmp/build-3936945300/.npmrc
+5 silly config load:file:/etc/npmrc
+6 verbose title npm run build
+7 verbose argv "run" "build"
+8 verbose logfile logs-max:10 dir:/tmp/build-3936945300/.npm/_logs/2026-06-10T08_31_13_283Z-
+9 verbose logfile /tmp/build-3936945300/.npm/_logs/2026-06-10T08_31_13_283Z-debug-0.log
+10 silly logfile done cleaning log files

@@ -1,0 +1,41 @@
+{
+  "configMigration": true,
+  "extends": [
+    "config:recommended"
+  ],
+  "ignorePaths": ["**/node_modules/**"],
+  "automerge": true,
+  "major": {
+    "automerge": false
+  },
+  "labels": [
+    "type: dependencies",
+    "renovate"
+  ],
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 1,
+  "rangeStrategy": "bump",
+  "packageRules": [
+    {
+      "matchDepTypes": ["dependencies"],
+      "enabled": false
+    },
+    {
+      "matchPackageNames": ["/webpack/"],
+      "groupName": "webpack",
+      "extends": ["schedule:weekly"]
+    },
+    {
+      "matchPackageNames": [
+        "/eslint/",
+        "globals"
+      ],
+      "groupName": "eslint",
+      "extends": ["schedule:monthly"]
+    },
+    {
+      "matchPackageNames": ["@types/node"],
+      "extends": ["schedule:quarterly"]
+    }
+  ]
+}

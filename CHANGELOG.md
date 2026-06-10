@@ -1,0 +1,40 @@
+# Changelog
+
+This document gives an overview of changes to the Cypress GitHub JavaScript Action [cypress-io/github-action](https://github.com/cypress-io/github-action).
+
+See [Releases](https://github.com/cypress-io/github-action/releases) for full details of changes.
+
+| Version | Changes                                                                                                      |
+| ------- | ------------------------------------------------------------------------------------------------------------ |
+| v7.1.0  | Add parameter `package-manager-cache`                                                                        |
+| v7.0.0  | Action runs under Node.js 24 instead of Node.js 20                                                           |
+| v6.10.0 | Examples remove Node.js 23. End of support for Node.js 23.                                                   |
+| v6.9.0  | Add parameter validation for `command`                                                                       |
+| v6.8.0  | Examples remove Node.js 18. End of support for Node.js 18.                                                   |
+| v6.7.10 | Examples updated to Cypress 14                                                                               |
+| v6.7.9  | Migrate to `@actions/cache@4.0.0` for continued access to GitHub Actions caching services                    |
+| v6.7.0  | Examples remove Node.js 21. End of support for Node.js 21.                                                   |
+| v6.6.0  | Add parameter `summary-title`                                                                                |
+| v6.5.0  | Examples remove Node.js 16. End of support for Node.js 16.                                                   |
+| v6.4.0  | Action adds PR number and URL if available when recording                                                    |
+| v6.3.0  | v6 is recommended action version                                                                             |
+| v6.2.0  | Examples updated to Cypress 13                                                                               |
+| v6.1.0  | Examples for Cypress 9 archived in action's [v5](https://github.com/cypress-io/github-action/tree/v5) branch |
+| v6.0.0  | Action runs under Node.js 20 instead of Node.js 16                                                           |
+| v5.8.1  | Examples remove Node.js 19. End of support for Node.js 19                                                    |
+| v5.8.0  | Add GitHub step output `resultsUrl`. Deprecate `dashboardUrl`.                                               |
+| v5.7.0  | Add basic Yarn Modern Plug'n'Play support                                                                    |
+| v5.6.2  | Examples add Node.js 20. End of support and removal of Node.js 14 examples.                                  |
+| v5.6.0  | Add check for lockfile presence                                                                              |
+| v5.5.0  | Examples add Yarn Modern                                                                                     |
+| v5.4.0  | Examples add Yarn Classic                                                                                    |
+| v5.3.0  | Add parameter `publish-summary` (default `true`)                                                             |
+| v5.2.0  | Examples add Node.js 19                                                                                      |
+| v5.1.0  | Add parameter `auto-cancel-after-failures`                                                                   |
+| v5.0.0  | Examples add Node.js 18 and remove Node.js 12                                                                |
+| v4.2.2  | Dependency on GitHub `set-output` workflow command removed                                                   |
+| v4.2.0  | Support for `pnpm` added                                                                                     |
+| v4.0.0  | Support for Cypress 10 and later versions added                                                              |
+| v3      | Action runs under Node.js 16 instead of Node.js 12                                                           |
+| v2      | Cypress runs using the [Module API](https://on.cypress.io/module-api)                                        |
+| v1      | _This version is no longer runnable in GitHub due to security changes._                                      |
