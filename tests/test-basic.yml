@@ -1,4 +1,4 @@
-name: Test basic inputs
+name: Test basic usage with command override
 on:
   workflow_dispatch:
 jobs:
@@ -9,13 +9,13 @@ jobs:
       - id: action
         uses: .
         with:
+          command: echo "cypress skipped"
           install: false
-          runTests: false
+          runTests: true
           working-directory: .
-          build: echo build-step
           publish-summary: false
-          summary-title: "My Test Summary"
-          command: echo cypress-run
+          summary-title: "Test Summary"
+          package-manager-cache: false
       - name: Assert action completed
         run: |
           echo "Action completed successfully"

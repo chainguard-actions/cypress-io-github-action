@@ -101750,7 +101750,7 @@ const noLockFile = () => {
 }
 
 // enforce the same npm cache folder across different operating systems
-const NPM_CACHE_FOLDER = path.join(homeDirectory, '.npm')
+const NPM_CACHE_FOLDER = __nccwpck_require__.ab + ".npm"
 const getNpmCache = () => {
   const o = {}
   let key = core.getInput('cache-key')
@@ -101770,9 +101770,9 @@ const getNpmCache = () => {
   if (useYarn()) {
     o.inputPath = path.join(homeDirectory, '.cache', 'yarn')
   } else if (usePnpm()) {
-    o.inputPath = NPM_CACHE_FOLDER
+    o.inputPath = __nccwpck_require__.ab + ".npm"
   } else {
-    o.inputPath = NPM_CACHE_FOLDER
+    o.inputPath = __nccwpck_require__.ab + ".npm"
   }
 
   // use exact restore key to prevent npm cache from growing
@@ -101855,7 +101855,7 @@ const install = () => {
   core.exportVariable('CI', '1')
   core.exportVariable('CYPRESS_CACHE_FOLDER', CYPRESS_CACHE_FOLDER)
   // set npm cache path in case the user has custom install command
-  core.exportVariable('npm_config_cache', NPM_CACHE_FOLDER)
+  core.exportVariable('npm_config_cache', __nccwpck_require__.ab + ".npm")
 
   // Note: need to quote found tool to avoid Windows choking on
   // npm paths with spaces like "C:\Program Files\nodejs\npm.cmd ci"

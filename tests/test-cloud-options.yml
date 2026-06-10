@@ -1,4 +1,4 @@
-name: Test cloud recording inputs
+name: Test Cypress Cloud recording options
 on:
   workflow_dispatch:
 jobs:
@@ -9,13 +9,13 @@ jobs:
       - id: action
         uses: .
         with:
+          command: echo "cypress skipped"
           install: false
-          runTests: false
           record: false
-          group: my-group
-          tag: my-tag
+          group: "my-group"
+          tag: "my-tag"
           parallel: false
-          ci-build-id: build-123
+          ci-build-id: "build-123"
           auto-cancel-after-failures: 5
       - name: Assert action completed
         run: |

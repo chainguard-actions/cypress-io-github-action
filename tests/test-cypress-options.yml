@@ -1,4 +1,4 @@
-name: Test Cypress run options - browser, spec, config, env, quiet
+name: Test Cypress run options
 on:
   workflow_dispatch:
 jobs:
@@ -9,17 +9,16 @@ jobs:
       - id: action
         uses: .
         with:
+          command: echo "cypress skipped"
           install: false
-          runTests: false
           browser: chrome
-          headed: false
-          spec: cypress/e2e/**/*.cy.js
           config: baseUrl=http://localhost:3000
-          config-file: cypress.config.js
-          env: FOO=bar,BAZ=qux
+          spec: cypress/e2e/**/*.cy.js
+          headed: false
           quiet: true
-        continue-on-error: true
-      - name: Assert action ran
+          env: MY_VAR=hello
+          expose: MY_PUBLIC_VAR=world
+      - name: Assert action completed
         run: |
-          echo "Action completed with cypress options"
+          echo "Action completed successfully"
           echo "PASS"
