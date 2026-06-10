@@ -1,4 +1,4 @@
-name: Test recording-related inputs
+name: Test install and misc inputs
 on:
   workflow_dispatch:
 jobs:
@@ -9,14 +9,14 @@ jobs:
       - id: action
         uses: .
         with:
-          command: echo "cypress run with recording options"
-          record: false
-          group: my-group
-          tag: my-tag
-          parallel: false
-          ci-build-id: build-123
-          auto-cancel-after-failures: 5
+          command: echo "cypress run with install options"
           install: false
+          install-command: echo "custom install"
+          cache-key: my-custom-cache-key
+          command-prefix: npx
+          env: MY_VAR=hello
+          summary-title: My Test Summary
+          publish-summary: false
           runTests: true
       - name: Assert action completed
         run: |

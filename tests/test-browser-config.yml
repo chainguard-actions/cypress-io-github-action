@@ -1,4 +1,4 @@
-name: Test recording-related inputs
+name: Test browser and config inputs
 on:
   workflow_dispatch:
 jobs:
@@ -9,13 +9,14 @@ jobs:
       - id: action
         uses: .
         with:
-          command: echo "cypress run with recording options"
-          record: false
-          group: my-group
-          tag: my-tag
-          parallel: false
-          ci-build-id: build-123
-          auto-cancel-after-failures: 5
+          command: echo "cypress run with browser config"
+          browser: chrome
+          config: baseUrl=http://localhost:3000
+          config-file: ''
+          spec: cypress/e2e/**/*.cy.js
+          headed: false
+          quiet: false
+          project: .
           install: false
           runTests: true
       - name: Assert action completed

@@ -1,4 +1,4 @@
-name: Test server options
+name: Test server and build inputs
 on:
   workflow_dispatch:
 jobs:
@@ -9,13 +9,15 @@ jobs:
       - id: action
         uses: .
         with:
-          install: false
-          runTests: false
-          start: "echo server-start"
-          start-windows: "echo server-start-windows"
-          wait-on: "http://localhost:3000"
+          command: echo "cypress run with server options"
+          build: echo "build step"
+          start: echo "start server"
+          start-windows: echo "start server windows"
+          wait-on: http://localhost:3000
           wait-on-timeout: 60
+          install: false
+          runTests: true
       - name: Assert action completed
         run: |
-          echo "Action completed successfully with server options"
+          echo "Action completed successfully"
           echo "PASS"
