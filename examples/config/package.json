@@ -1,0 +1,21 @@
+{
+  "name": "example-config",
+  "version": "2.0.0",
+  "description": "pass baseUrl config value via action",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "cypress run",
+    "build": "echo building ... server ... done!",
+    "start": "serve public --listen 3333",
+    "cy:open": "cypress open"
+  },
+  "private": true,
+  "devDependencies": {
+    "cypress": "15.18.0",
+    "serve": "^14.2.6"
+  },
+  "allowScripts": {
+    "cypress": true
+  }
+}

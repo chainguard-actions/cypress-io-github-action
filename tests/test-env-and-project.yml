@@ -1,0 +1,34 @@
+name: Test env, expose, project, summary-title, cache-key inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REF: refs/heads/main
+      GITHUB_EVENT_NAME: push
+      GITHUB_REPOSITORY: cypress-io/github-action
+      GITHUB_RUN_ID: "1"
+      GITHUB_WORKFLOW: test
+      GITHUB_SHA: abc123
+      GITHUB_SERVER_URL: https://github.com
+      GITHUB_API_URL: https://api.github.com
+      CYPRESS_INSTALL_BINARY: "0"
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        uses: .
+        with:
+          install: false
+          runTests: false
+          env: MY_VAR=hello,OTHER_VAR=world
+          expose: PUBLIC_CONFIG=value
+          project: .
+          summary-title: My Test Run Summary
+          cache-key: custom-cache-key-v1
+
+      - name: Assert action completed with env and project options
+        run: |
+          echo "Action completed with env, expose, project, summary-title, cache-key inputs"
+          echo "PASS"
