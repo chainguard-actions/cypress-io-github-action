@@ -1,0 +1,34 @@
+name: example-firefox
+on:
+  push:
+    branches:
+      - 'master'
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+
+jobs:
+  firefox:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Firefox
+        uses: ./ # if copying, replace with cypress-io/github-action@v7
+        timeout-minutes: 3
+        with:
+          # let's show browser and system info
+          build: npx cypress info
+          working-directory: examples/browser
+          browser: firefox
+
+      # report screenshot size and store the screenshots as test artifacts
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: screenshots-in-firefox
+          path: examples/browser/cypress/screenshots
+
+      - run: npx image-size cypress/screenshots/**/*.png
+        working-directory: examples/browser

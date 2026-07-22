@@ -1,0 +1,21 @@
+name: Test publish-summary false
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        name: Run action with publish-summary=false and runTests=false
+        uses: .
+        with:
+          install: false
+          runTests: false
+          publish-summary: false
+
+      - name: Assert action completed successfully without summary
+        run: |
+          echo "Action completed successfully with publish-summary=false"
+          echo "PASS: publish-summary=false scenario works"

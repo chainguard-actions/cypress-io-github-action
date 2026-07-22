@@ -1,0 +1,9 @@
+{
+  "name": "fixture-basic-project",
+  "version": "1.0.0",
+  "description": "Minimal fixture project for testing cypress-io/github-action",
+  "private": true,
+  "scripts": {
+    "test": "echo 'no tests'"
+  }
+}

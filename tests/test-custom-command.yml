@@ -4,26 +4,21 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    env:
-      GITHUB_REF: refs/heads/main
-      GITHUB_EVENT_NAME: push
-      GITHUB_REPOSITORY: cypress-io/github-action
-      GITHUB_RUN_ID: "1"
-      GITHUB_WORKFLOW: test
-      GITHUB_SHA: abc123
-      GITHUB_SERVER_URL: https://github.com
-      GITHUB_API_URL: https://api.github.com
-      CYPRESS_INSTALL_BINARY: "0"
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - id: action
+        name: Run action with custom command
         uses: .
         with:
           install: false
-          command: echo custom-command-ran
+          command: touch /tmp/custom-command-ran.txt
 
-      - name: Assert action completed with custom command
+      - name: Assert custom command was executed
         run: |
-          echo "Action completed with custom command override"
-          echo "PASS"
+          echo "Checking if custom command ran..."
+          if [ ! -f /tmp/custom-command-ran.txt ]; then
+            echo "FAIL: custom command marker file not found - custom command was not executed"
+            exit 1
+          fi
+          echo "PASS: custom command was executed correctly"

@@ -1,0 +1,37 @@
+name: example-yarn-modern-pnp
+on:
+  push:
+    branches:
+      - 'master'
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+
+jobs:
+  yarn-modern-pnp:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Enable Corepack # see https://yarnpkg.com/getting-started/install
+        run: |
+          npm install -g corepack
+          corepack enable yarn
+      - name: Set up Yarn cache
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: '.node-version'
+          cache: yarn
+          cache-dependency-path: examples/yarn-modern-pnp/yarn.lock
+      - name: Reinstall Corepack # actions/setup-node may have replaced Corepack with an older version
+        run: |
+          npm install -g corepack
+          corepack enable yarn
+      - name: Custom Yarn command
+        uses: ./ # if copying, replace with cypress-io/github-action@v7
+        with:
+          working-directory: examples/yarn-modern-pnp
+          # https://yarnpkg.com/cli/install
+          install-command: yarn install
+          command: yarn run --binaries-only cypress run

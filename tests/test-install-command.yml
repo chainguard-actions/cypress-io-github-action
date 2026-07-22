@@ -1,0 +1,27 @@
+name: Test custom install command
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        name: Run action with custom install command and runTests=false
+        uses: .
+        env:
+          CYPRESS_INSTALL_BINARY: '0'
+        with:
+          install-command: touch /tmp/install-command-ran.txt
+          package-manager-cache: false
+          runTests: false
+
+      - name: Assert custom install command was executed
+        run: |
+          echo "Checking if custom install command ran..."
+          if [ ! -f /tmp/install-command-ran.txt ]; then
+            echo "FAIL: custom install command marker file not found"
+            exit 1
+          fi
+          echo "PASS: custom install command was executed correctly"
