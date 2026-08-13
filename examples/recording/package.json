@@ -1,0 +1,18 @@
+{
+  "name": "example-recording",
+  "version": "2.0.0",
+  "description": "recording test results to Cypress Cloud",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "cypress run",
+    "cy:open": "cypress open"
+  },
+  "private": true,
+  "devDependencies": {
+    "cypress": "15.20.0"
+  },
+  "allowScripts": {
+    "cypress": true
+  }
+}

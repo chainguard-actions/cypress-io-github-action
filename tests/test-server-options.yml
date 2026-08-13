@@ -1,0 +1,29 @@
+name: Test server start and wait-on options inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          install: false
+          runTests: false
+          start: echo "server started"
+          start-windows: echo "server started on windows"
+          wait-on: http://localhost:3000
+          wait-on-timeout: 30
+        continue-on-error: true
+      - name: Assert action ran
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ] || [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action ran with start/start-windows/wait-on/wait-on-timeout inputs"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

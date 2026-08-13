@@ -1,0 +1,17 @@
+{
+  "name": "example-env",
+  "version": "2.0.0",
+  "description": "example passing env variables to Cypress",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "cypress run"
+  },
+  "private": true,
+  "devDependencies": {
+    "cypress": "15.20.0"
+  },
+  "allowScripts": {
+    "cypress": true
+  }
+}
