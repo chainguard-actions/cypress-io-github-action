@@ -1,0 +1,12 @@
+name: 'Handle Comment Workflow'
+on:
+  issue_comment:
+    types:
+      - created
+permissions: {}
+jobs:
+  closed-issue-comment:
+    # skip in fork
+    if: github.repository == 'cypress-io/github-action'
+    uses: cypress-io/cypress/.github/workflows/triage_handle_new_comments.yml@d52f14584e09e121ca8572378c30d5eebf72ffe5 # develop
+    secrets: inherit

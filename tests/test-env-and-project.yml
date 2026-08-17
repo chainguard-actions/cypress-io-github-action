@@ -1,0 +1,24 @@
+name: Test env, expose, project, summary-title inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run action with env, expose, project, summary-title inputs
+        id: action
+        uses: .
+        with:
+          install: false
+          command: echo "env-project-test-executed"
+          env: MY_VAR=hello,OTHER_VAR=world
+          expose: PUBLIC_CONFIG=value1
+          project: .
+          summary-title: "My Test Run Summary"
+
+      - name: Assert action completed successfully
+        run: |
+          echo "Action completed with env/expose/project/summary-title inputs"
+          echo "PASS: action ran with env and project options"

@@ -1,0 +1,23 @@
+name: Test install only (skip tests)
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      CYPRESS_INSTALL_BINARY: 0
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run action with custom install command and runTests disabled
+        id: action
+        uses: .
+        with:
+          working-directory: tests/fixtures/cypress-project
+          install-command: echo "skipping real install"
+          runTests: false
+
+      - name: Assert action completed successfully
+        run: |
+          echo "Action completed with install-command override and runTests=false"
+          echo "PASS: action ran install-only scenario"

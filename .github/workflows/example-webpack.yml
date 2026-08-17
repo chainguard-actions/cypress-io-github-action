@@ -1,0 +1,23 @@
+name: example-webpack
+on:
+  push:
+    branches:
+      - 'master'
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+
+jobs:
+  wait:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Cypress tests
+        uses: ./ # if copying, replace with cypress-io/github-action@v7
+        with:
+          working-directory: examples/webpack
+          start: npm start
+          wait-on: 'http://localhost:8080'

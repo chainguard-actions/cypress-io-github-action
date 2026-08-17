@@ -1,0 +1,23 @@
+name: example-install-command
+on:
+  push:
+    branches:
+      - 'master'
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+
+jobs:
+  install-command:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Custom Yarn command
+        uses: ./ # if copying, replace with cypress-io/github-action@v7
+        with:
+          working-directory: examples/install-command
+          # https://classic.yarnpkg.com/en/docs/cli/install
+          install-command: yarn --frozen-lockfile --silent

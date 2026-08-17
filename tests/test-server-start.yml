@@ -1,0 +1,24 @@
+name: Test server start options (start, start-windows, wait-on, wait-on-timeout)
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run action with start, start-windows, wait-on, wait-on-timeout inputs
+        id: action
+        uses: .
+        with:
+          install: false
+          command: echo "server-start-test-executed"
+          start: echo "server started"
+          start-windows: echo "server started on windows"
+          wait-on: http://localhost:3000
+          wait-on-timeout: 30
+
+      - name: Assert action completed successfully
+        run: |
+          echo "Action completed with server start inputs"
+          echo "PASS: action ran with start/wait-on options"

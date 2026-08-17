@@ -1,0 +1,9 @@
+{
+  "name": "test-cypress-project",
+  "version": "1.0.0",
+  "description": "Minimal Cypress project for testing the github-action",
+  "private": true,
+  "devDependencies": {
+    "cypress": "15.16.0"
+  }
+}

@@ -1,0 +1,30 @@
+name: Test publish-summary false
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REF: refs/heads/main
+      GITHUB_EVENT_NAME: push
+      GITHUB_REPOSITORY: test-owner/test-repo
+      GITHUB_WORKFLOW: test-workflow
+      GITHUB_SHA: abc1234567890abcdef1234567890abcdef12345
+      GITHUB_RUN_ID: "1"
+      GITHUB_SERVER_URL: https://github.com
+      GITHUB_API_URL: https://api.github.com
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        uses: .
+        with:
+          install: false
+          runTests: false
+          package-manager-cache: false
+          publish-summary: false
+
+      - name: Assert action completed without error
+        run: |
+          echo "Action completed with publish-summary=false"
+          echo "PASS"

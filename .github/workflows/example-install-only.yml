@@ -1,0 +1,40 @@
+name: example-install-only
+on:
+  push:
+    branches:
+      - 'master'
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+
+jobs:
+  # do not install every dependency in this example
+  # just install Cypress, but make sure to cache it
+  install-cypress-only:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout 🛎
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      # cache npm modules and Cypress binary folder
+      # we can use "package-lock.json" as the key file
+      # to make sure we use the precise Cypress version
+      # (which is important when using ^ version in package.json)
+      # see https://github.com/actions/cache
+      - name: Cache npm and Cypress 📦
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: |
+            ~/.cache/Cypress
+            node_modules
+          key: my-cache-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Cypress 📥
+        run: npm install cypress@15.16.0 --save-dev
+
+      - name: Cypress tests 🧪
+        uses: ./ # if copying, replace with cypress-io/github-action@v7
+        with:
+          working-directory: examples/install-only
+          install: false
