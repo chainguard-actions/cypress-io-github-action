@@ -1,4 +1,4 @@
-name: Test run options
+name: Test Cypress run options (browser, spec, config, env, quiet)
 on:
   workflow_dispatch:
 jobs:
@@ -6,19 +6,33 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up minimal project directory
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/cypress-run-opts"
+          cat > "$GITHUB_WORKSPACE/cypress-run-opts/package-lock.json" <<'EOF'
+          {
+            "name": "test-project",
+            "version": "1.0.0",
+            "lockfileVersion": 3,
+            "requires": true,
+            "packages": {}
+          }
+          EOF
+
       - id: action
         uses: .
         with:
+          working-directory: cypress-run-opts
           install: false
           runTests: false
           browser: chrome
-          spec: "cypress/e2e/**/*.cy.js"
-          config: "baseUrl=http://localhost:3000"
-          env: "MY_VAR=hello"
-          headed: false
+          spec: cypress/e2e/**/*.cy.js
+          config: baseUrl=http://localhost:3000,viewportWidth=1280
+          env: FOO=bar,BAZ=qux
           quiet: true
-          project: "."
-      - name: Assert action completed
+
+      - name: Assert action completed with run options
         run: |
-          echo "Action completed successfully with run options"
-          echo "PASS"
+          echo "Action completed with browser, spec, config, env, quiet inputs"
+          echo "PASS: action accepted run options without error"

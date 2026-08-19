@@ -1,0 +1,39 @@
+name: Test Cypress recording options (headed, parallel, group, tag, ci-build-id, auto-cancel-after-failures)
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up minimal project directory
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/cypress-recording-opts"
+          cat > "$GITHUB_WORKSPACE/cypress-recording-opts/package-lock.json" <<'EOF'
+          {
+            "name": "test-project",
+            "version": "1.0.0",
+            "lockfileVersion": 3,
+            "requires": true,
+            "packages": {}
+          }
+          EOF
+
+      - id: action
+        uses: .
+        with:
+          working-directory: cypress-recording-opts
+          install: false
+          runTests: false
+          headed: true
+          parallel: false
+          group: my-group
+          tag: nightly,regression
+          ci-build-id: build-123
+          auto-cancel-after-failures: 5
+
+      - name: Assert action completed with recording options
+        run: |
+          echo "Action completed with headed, parallel, group, tag, ci-build-id, auto-cancel-after-failures inputs"
+          echo "PASS: action accepted recording options without error"

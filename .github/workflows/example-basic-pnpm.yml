@@ -1,0 +1,47 @@
+name: example-basic-pnpm
+on:
+  push:
+    branches:
+      - 'master'
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  basic-pnpm:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-24.04
+          - windows-2025
+          - macos-26
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+        # See https://github.com/pnpm/action-setup
+      - name: Install pnpm
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
+        with:
+          version: 10
+
+        # See https://github.com/actions/setup-node
+      - name: Install Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: '.node-version'
+          cache: pnpm
+          cache-dependency-path: examples/basic-pnpm/pnpm-lock.yaml
+
+      - name: Cypress tests
+        uses: ./ # if copying, replace with cypress-io/github-action@v7
+        with:
+          package-manager-cache: false
+          working-directory: examples/basic-pnpm
+          # print information about detected browsers, etc
+          # see https://on.cypress.io/command-line#cypress-info
+          build: pnpm exec cypress info

@@ -1,0 +1,37 @@
+name: Test Cypress server start options (start, start-windows, wait-on, wait-on-timeout)
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up minimal project directory
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/cypress-server-opts"
+          cat > "$GITHUB_WORKSPACE/cypress-server-opts/package-lock.json" <<'EOF'
+          {
+            "name": "test-project",
+            "version": "1.0.0",
+            "lockfileVersion": 3,
+            "requires": true,
+            "packages": {}
+          }
+          EOF
+
+      - id: action
+        uses: .
+        with:
+          working-directory: cypress-server-opts
+          install: false
+          runTests: false
+          start: echo "server started"
+          start-windows: echo "server started on windows"
+          wait-on: http://localhost:3000
+          wait-on-timeout: 60
+
+      - name: Assert action completed with server start options
+        run: |
+          echo "Action completed with start, start-windows, wait-on, wait-on-timeout inputs"
+          echo "PASS: action accepted server start options without error"

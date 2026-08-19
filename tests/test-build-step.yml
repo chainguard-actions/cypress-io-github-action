@@ -1,0 +1,46 @@
+name: Test build step before tests
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up minimal project directory
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/cypress-build-test"
+          cat > "$GITHUB_WORKSPACE/cypress-build-test/package-lock.json" <<'EOF'
+          {
+            "name": "test-project",
+            "version": "1.0.0",
+            "lockfileVersion": 3,
+            "requires": true,
+            "packages": {}
+          }
+          EOF
+          # Create a build script that the action will run
+          # Uses relative path since exec runs with cwd=working-directory
+          cat > "$GITHUB_WORKSPACE/cypress-build-test/build.sh" <<'EOF'
+          #!/bin/sh
+          echo "build step executed"
+          touch build-output.txt
+          EOF
+          chmod +x "$GITHUB_WORKSPACE/cypress-build-test/build.sh"
+
+      - id: action
+        uses: .
+        with:
+          working-directory: cypress-build-test
+          install: false
+          build: sh build.sh
+          runTests: false
+
+      - name: Assert build step ran
+        run: |
+          echo "Checking if build output file was created..."
+          if [ ! -f "$GITHUB_WORKSPACE/cypress-build-test/build-output.txt" ]; then
+            echo "FAIL: build output file was not created by build step"
+            exit 1
+          fi
+          echo "PASS: build step ran and created output file"

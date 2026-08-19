@@ -1,4 +1,4 @@
-name: Test install options
+name: Test Cypress install and project options (project, cache-key, install-command, command-prefix, summary-title)
 on:
   workflow_dispatch:
 jobs:
@@ -6,17 +6,33 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up minimal project directory
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/cypress-install-opts"
+          cat > "$GITHUB_WORKSPACE/cypress-install-opts/package-lock.json" <<'EOF'
+          {
+            "name": "test-project",
+            "version": "1.0.0",
+            "lockfileVersion": 3,
+            "requires": true,
+            "packages": {}
+          }
+          EOF
+
       - id: action
         uses: .
         with:
+          working-directory: cypress-install-opts
           install: false
           runTests: false
-          install-command: "npm ci"
-          cache-key: "my-custom-cache-key"
-          command-prefix: "npx"
-          build: "echo build-step"
-          working-directory: "."
-      - name: Assert action completed
+          project: .
+          cache-key: my-custom-cache-key-v1
+          install-command: npm ci --prefer-offline
+          command-prefix: npx
+          summary-title: My Cypress Test Results
+
+      - name: Assert action completed with install options
         run: |
-          echo "Action completed successfully with install options"
-          echo "PASS"
+          echo "Action completed with project, cache-key, install-command, command-prefix, summary-title inputs"
+          echo "PASS: action accepted install and project options without error"

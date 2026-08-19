@@ -1,0 +1,18 @@
+name: 'Add issue/PR to Triage Board'
+on:
+  issues:
+    types:
+      - opened
+  pull_request_target:
+    types:
+      - opened
+
+permissions:
+  contents: read
+
+jobs:
+  add-to-triage-project-board:
+    # skip in fork
+    if: github.repository == 'cypress-io/github-action'
+    uses: cypress-io/cypress/.github/workflows/triage_add_to_project.yml@b4ad58f5275ea0233bb114cb66c85f41f5ab6a8b # develop
+    secrets: inherit

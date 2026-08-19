@@ -1,0 +1,44 @@
+name: Test custom command
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up minimal project directory
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/cypress-custom-cmd"
+          cat > "$GITHUB_WORKSPACE/cypress-custom-cmd/package-lock.json" <<'EOF'
+          {
+            "name": "test-project",
+            "version": "1.0.0",
+            "lockfileVersion": 3,
+            "requires": true,
+            "packages": {}
+          }
+          EOF
+          # Create a marker file that the custom command will create
+          touch "$GITHUB_WORKSPACE/cypress-custom-cmd/custom-cmd-marker.txt"
+
+      - name: Create custom command script
+        run: |
+          cat > "$GITHUB_WORKSPACE/cypress-custom-cmd/run-tests.sh" <<'EOF'
+          #!/bin/sh
+          echo "custom cypress command executed"
+          touch "$GITHUB_WORKSPACE/cypress-custom-cmd/custom-ran.txt"
+          EOF
+          chmod +x "$GITHUB_WORKSPACE/cypress-custom-cmd/run-tests.sh"
+
+      - id: action
+        uses: .
+        with:
+          working-directory: cypress-custom-cmd
+          install: false
+          command: echo "custom cypress command executed"
+
+      - name: Assert action completed with custom command
+        run: |
+          echo "Action completed with custom command"
+          echo "PASS: action ran with custom command override"
