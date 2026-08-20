@@ -1,0 +1,36 @@
+name: Test build step before tests
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      CYPRESS_INSTALL_BINARY: '0'
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up minimal npm project
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/build-test-project"
+          cd "$GITHUB_WORKSPACE/build-test-project"
+          printf '{"name":"build-test-project","version":"1.0.0","private":true}\n' > package.json
+          printf '{"name":"build-test-project","version":"1.0.0","lockfileVersion":3,"requires":true,"packages":{"":{"name":"build-test-project","version":"1.0.0"}}}\n' > package-lock.json
+
+      - id: action
+        uses: .
+        with:
+          working-directory: ${{ github.workspace }}/build-test-project
+          install: false
+          build: touch build-output.txt
+          runTests: false
+          publish-summary: false
+
+      - name: Assert build step ran
+        run: |
+          echo "Checking that build step was executed"
+          if [ ! -f "$GITHUB_WORKSPACE/build-test-project/build-output.txt" ]; then
+            echo "FAIL: build output file not found - build step did not run"
+            exit 1
+          fi
+          echo "Build output file exists (created by build step)"
+          echo "PASS: build step ran and produced output"

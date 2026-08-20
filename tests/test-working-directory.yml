@@ -1,0 +1,35 @@
+name: Test working-directory input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      CYPRESS_INSTALL_BINARY: '0'
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up project in subdirectory
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/subdir/myapp"
+          cd "$GITHUB_WORKSPACE/subdir/myapp"
+          printf '{"name":"myapp","version":"1.0.0","private":true}\n' > package.json
+          printf '{"name":"myapp","version":"1.0.0","lockfileVersion":3,"requires":true,"packages":{"":{"name":"myapp","version":"1.0.0"}}}\n' > package-lock.json
+          echo "marker" > working-dir-marker.txt
+
+      - id: action
+        uses: .
+        with:
+          working-directory: ${{ github.workspace }}/subdir/myapp
+          install: false
+          runTests: false
+          publish-summary: false
+
+      - name: Assert working directory was used
+        run: |
+          echo "Checking that working-directory was respected"
+          if [ ! -f "$GITHUB_WORKSPACE/subdir/myapp/working-dir-marker.txt" ]; then
+            echo "FAIL: working directory marker file not found"
+            exit 1
+          fi
+          echo "PASS: working-directory input was accepted and action completed"

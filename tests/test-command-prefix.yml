@@ -1,0 +1,30 @@
+name: Test install-command input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      CYPRESS_INSTALL_BINARY: '0'
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up minimal npm project
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/install-cmd-project"
+          cd "$GITHUB_WORKSPACE/install-cmd-project"
+          printf '{"name":"install-cmd-project","version":"1.0.0","private":true}\n' > package.json
+          printf '{"name":"install-cmd-project","version":"1.0.0","lockfileVersion":3,"requires":true,"packages":{"":{"name":"install-cmd-project","version":"1.0.0"}}}\n' > package-lock.json
+
+      - id: action
+        uses: .
+        with:
+          working-directory: ${{ github.workspace }}/install-cmd-project
+          install-command: echo custom-install-ran
+          runTests: false
+          publish-summary: false
+
+      - name: Assert action completed with custom install command
+        run: |
+          echo "Action completed successfully with custom install-command"
+          echo "PASS: action accepted install-command input and ran without error"

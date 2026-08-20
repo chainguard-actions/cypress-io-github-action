@@ -1,0 +1,30 @@
+name: Test skip tests (runTests false)
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      CYPRESS_INSTALL_BINARY: '0'
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up minimal npm project
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/cypress-test-project"
+          cd "$GITHUB_WORKSPACE/cypress-test-project"
+          printf '{"name":"test-project","version":"1.0.0","private":true}\n' > package.json
+          printf '{"name":"test-project","version":"1.0.0","lockfileVersion":3,"requires":true,"packages":{"":{"name":"test-project","version":"1.0.0"}}}\n' > package-lock.json
+
+      - id: action
+        uses: .
+        with:
+          working-directory: ${{ github.workspace }}/cypress-test-project
+          install: false
+          runTests: false
+          publish-summary: false
+
+      - name: Assert action completed without error
+        run: |
+          echo "Action completed successfully with runTests=false"
+          echo "PASS: action ran without error when runTests is false"
