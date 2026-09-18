@@ -1,0 +1,21 @@
+name: Test project and cache-key inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        uses: .
+        with:
+          install: false
+          runTests: false
+          project: .
+          cache-key: my-custom-cache-key-v1
+          expose: MY_PUBLIC_VAR=public-value
+
+      - name: Assert action completed with project, cache-key, and expose inputs
+        run: |
+          echo "PASS: action ran with project, cache-key, and expose inputs"

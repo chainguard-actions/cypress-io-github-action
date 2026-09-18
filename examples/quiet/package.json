@@ -1,0 +1,16 @@
+{
+  "name": "example-quiet",
+  "description": "running Cypress with quiet flag",
+  "type": "module",
+  "scripts": {
+    "test": "cypress run",
+    "info": "cypress info"
+  },
+  "private": true,
+  "devDependencies": {
+    "cypress": "16.0.0"
+  },
+  "allowScripts": {
+    "cypress": true
+  }
+}

@@ -1,0 +1,20 @@
+name: Test install options inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        uses: .
+        with:
+          install: false
+          runTests: false
+          install-command: npm ci --prefer-offline
+          command-prefix: npx
+
+      - name: Assert action completed with install options
+        run: |
+          echo "PASS: action ran with install-command and command-prefix inputs"

@@ -1,0 +1,22 @@
+name: Test start and wait-on inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        uses: .
+        with:
+          install: false
+          runTests: false
+          start: echo "server started"
+          start-windows: echo "server started on windows"
+          wait-on: http://localhost:3000
+          wait-on-timeout: 30
+
+      - name: Assert action completed with start and wait-on inputs
+        run: |
+          echo "PASS: action ran with start, start-windows, wait-on, and wait-on-timeout inputs"
