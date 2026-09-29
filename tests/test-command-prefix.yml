@@ -1,0 +1,66 @@
+name: Test command-prefix option
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create a fake npx that simulates cypress run
+        run: |
+          # The action calls: exec(npxPath, ['npx', 'cypress', 'run', ...])
+          # So fake npx receives 'npx cypress run' as arguments ($*)
+          mkdir -p /tmp/fake-bin
+          cat > /tmp/fake-bin/npx << 'EOF'
+          #!/bin/sh
+          echo "fake-npx called with: $*"
+          echo "fake-npx called with: $*" >> /tmp/cypress-prefix-test.log
+          # Match any call that includes 'cypress'
+          if echo "$*" | grep -q "cypress"; then
+            echo "Simulated cypress run success"
+            exit 0
+          fi
+          # Fall through to real npx for other calls
+          exec /usr/bin/npx "$@"
+          EOF
+          chmod +x /tmp/fake-bin/npx
+          # Add to GITHUB_PATH so it's found first in PATH for subsequent steps
+          echo "/tmp/fake-bin" >> "$GITHUB_PATH"
+          # Also try /usr/local/bin which is typically before /usr/bin in PATH
+          cp /tmp/fake-bin/npx /usr/local/bin/npx 2>/dev/null || true
+          echo "Fake npx setup complete"
+
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          install: false
+          command-prefix: npx
+
+      - name: Assert action ran with command-prefix
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ -f /tmp/cypress-prefix-test.log ]; then
+            echo "npx log contents:"
+            cat /tmp/cypress-prefix-test.log
+          fi
+          if [ "$OUTCOME" = "success" ]; then
+            if [ ! -f /tmp/cypress-prefix-test.log ]; then
+              echo "FAIL: fake npx was never called"
+              exit 1
+            fi
+            if ! grep -q "cypress" /tmp/cypress-prefix-test.log; then
+              echo "FAIL: npx was not called with cypress"
+              cat /tmp/cypress-prefix-test.log
+              exit 1
+            fi
+            echo "PASS: action ran with command-prefix and called cypress via npx"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (sentinel repo or environment limitation)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

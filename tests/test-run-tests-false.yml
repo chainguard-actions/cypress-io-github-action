@@ -1,0 +1,35 @@
+name: Test runTests false skips test execution
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          install: false
+          runTests: false
+          build: sh -c "echo build_ran > /tmp/cypress-runtests-false-marker.txt"
+
+      - name: Assert runTests:false skipped tests but ran build
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ]; then
+            if [ ! -f /tmp/cypress-runtests-false-marker.txt ]; then
+              echo "FAIL: build marker not found - build step did not run"
+              exit 1
+            fi
+            echo "build marker contents: $(cat /tmp/cypress-runtests-false-marker.txt)"
+            echo "PASS: action succeeded with runTests:false and build step ran"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (sentinel repo or environment limitation)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

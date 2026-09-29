@@ -1,0 +1,8 @@
+{
+  "name": "cypress-test-project",
+  "version": "1.0.0",
+  "description": "Minimal fixture project for cypress-io/github-action tests",
+  "scripts": {
+    "test": "echo 'no tests'"
+  }
+}

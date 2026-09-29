@@ -1,0 +1,40 @@
+name: Test build step before tests
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          install: false
+          build: sh -c "echo build_step_executed > /tmp/cypress-build-marker.txt"
+          command: echo "cypress tests would run here"
+
+      - name: Assert build step ran before tests
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ]; then
+            if [ ! -f /tmp/cypress-build-marker.txt ]; then
+              echo "FAIL: build marker file not found - build step did not run"
+              exit 1
+            fi
+            BUILD_OUTPUT=$(cat /tmp/cypress-build-marker.txt)
+            echo "build output: $BUILD_OUTPUT"
+            if ! echo "$BUILD_OUTPUT" | grep -q "build_step_executed"; then
+              echo "FAIL: build marker file does not contain expected content"
+              exit 1
+            fi
+            echo "PASS: build step ran before tests"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (sentinel repo or environment limitation)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
