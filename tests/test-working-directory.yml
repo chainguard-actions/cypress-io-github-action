@@ -1,0 +1,25 @@
+name: Test working directory
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create working directory
+        run: mkdir -p /tmp/my-app
+      - id: action
+        uses: .
+        with:
+          install: false
+          runTests: false
+          build: touch /tmp/my-app/build-done
+          working-directory: /tmp/my-app
+      - name: Assert build ran in working directory
+        run: |
+          echo "Checking build output in working directory..."
+          if [ ! -f /tmp/my-app/build-done ]; then
+            echo "FAIL: build-done not found in working directory"
+            exit 1
+          fi
+          echo "PASS: build step ran in working directory"

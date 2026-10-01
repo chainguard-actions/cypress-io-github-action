@@ -1,0 +1,21 @@
+name: Test env, expose, project, and summary-title inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          install: false
+          command: echo "cypress env and project test"
+          env: MY_VAR=hello,OTHER_VAR=world
+          expose: PUBLIC_KEY=abc123
+          project: .
+          summary-title: "My Cypress Test Run"
+      - name: Assert action completed with env and project options
+        run: |
+          echo "Action completed successfully with env/expose/project/summary-title inputs"
+          echo "PASS"

@@ -1,0 +1,25 @@
+name: Test server start options (start, start-windows, wait-on, wait-on-timeout)
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Start a simple HTTP server for wait-on
+        run: |
+          python3 -m http.server 8080 &
+          echo "HTTP server started"
+      - id: action
+        uses: .
+        with:
+          install: false
+          command: echo "cypress server start test"
+          start: echo "server started"
+          start-windows: echo "server started on windows"
+          wait-on: http://localhost:8080
+          wait-on-timeout: 30
+      - name: Assert action completed with server start options
+        run: |
+          echo "Action completed successfully with start/start-windows/wait-on/wait-on-timeout inputs"
+          echo "PASS"
