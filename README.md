@@ -15,6 +15,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 | v7.4.3 | [`v7.4.3`](https://github.com/chainguard-actions/cypress-io-github-action/tree/v7.4.3) | [`0909094`](https://github.com/cypress-io/github-action/commit/09090944bd8aaa2a517cefb6e38bf1aae336b42b) |
 | v7.4.4 | [`v7.4.4`](https://github.com/chainguard-actions/cypress-io-github-action/tree/v7.4.4) | [`01e3b65`](https://github.com/cypress-io/github-action/commit/01e3b659a495b41649cdd0aa82e1d1624e26520b) |
 | v7.4.5 | [`v7.4.5`](https://github.com/chainguard-actions/cypress-io-github-action/tree/v7.4.5) | [`789d836`](https://github.com/cypress-io/github-action/commit/789d836053c5ca389c2905fc0c9f2909da778c46) |
+| v7.4.6 | [`v7.4.6`](https://github.com/chainguard-actions/cypress-io-github-action/tree/v7.4.6) | [`c541a95`](https://github.com/cypress-io/github-action/commit/c541a95ea92d9239347a2355f2e895cd4b3f8060) |
 
 ## Privacy
 
