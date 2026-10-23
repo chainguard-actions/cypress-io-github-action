@@ -1,6 +1,16 @@
 {
   "owner": "cypress-io",
   "repo": "github-action",
-  "version": "",
-  "url": "https://github.com/cypress-io/github-action"
+  "version": "v7.4.7",
+  "commit_sha": "bc982daf1fc26474fa0cf2c355d6c910616ce411",
+  "url": "https://github.com/cypress-io/github-action",
+  "policy_sha": "d636be7e43ef829af6e853da6b3c7566db9f72fe",
+  "test_policy_sha": "843adf9e4b8f85d0c08b27b9d0b09dd094b54702",
+  "test_agent_version": "2",
+  "harden_agent_version": "2",
+  "node_artifact": {
+    "gcs_uri": "gs://prod-actions-node-artifacts/node-artifacts/cypress-io/github-action/v7.4.7/sha256-57a3a765cbb848e1aa89eb6a4c551ef39ee8e14d5ba397183a9688d9c8e161a4.tar.gz",
+    "sha256": "57a3a765cbb848e1aa89eb6a4c551ef39ee8e14d5ba397183a9688d9c8e161a4",
+    "size_bytes": 5805700
+  }
 }

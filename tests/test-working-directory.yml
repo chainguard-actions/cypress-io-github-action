@@ -1,0 +1,43 @@
+name: Test working-directory
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Prepare working directory
+        run: |
+          rm -rf "$GITHUB_WORKSPACE/wd-test"
+          mkdir -p "$GITHUB_WORKSPACE/wd-test"
+          rm -f "$GITHUB_WORKSPACE/wd.marker"
+      - id: action
+        uses: .
+        with:
+          install: false
+          working-directory: wd-test
+          build: touch build.marker
+          command: touch wd.marker
+      - name: Assert commands ran inside working-directory
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          ls -la "$GITHUB_WORKSPACE/wd-test"
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: expected success"
+            exit 1
+          fi
+          if [ ! -f "$GITHUB_WORKSPACE/wd-test/wd.marker" ]; then
+            echo "FAIL: test command marker not in working-directory"
+            exit 1
+          fi
+          if [ ! -f "$GITHUB_WORKSPACE/wd-test/build.marker" ]; then
+            echo "FAIL: build marker not in working-directory"
+            exit 1
+          fi
+          if [ -f "$GITHUB_WORKSPACE/wd.marker" ]; then
+            echo "FAIL: command ran in workspace root instead of working-directory"
+            exit 1
+          fi
+          echo "PASS"

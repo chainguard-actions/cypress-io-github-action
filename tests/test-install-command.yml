@@ -1,0 +1,56 @@
+name: Test custom install-command
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      # skip Cypress binary list/verify/cache since no real Cypress is installed
+      CYPRESS_INSTALL_BINARY: "0"
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Prepare project with lockfile
+        run: |
+          rm -rf "$GITHUB_WORKSPACE/install-test"
+          mkdir -p "$GITHUB_WORKSPACE/install-test"
+          cd "$GITHUB_WORKSPACE/install-test"
+          echo '{"name":"install-test","version":"1.0.0","lockfileVersion":3,"requires":true,"packages":{"":{"name":"install-test","version":"1.0.0"}}}' > package-lock.json
+          echo '{"name":"install-test","version":"1.0.0"}' > package.json
+      - id: action
+        uses: .
+        with:
+          working-directory: install-test
+          package-manager-cache: false
+          install-command: touch installed.marker
+          command: touch tests-ran.marker
+      - name: Assert install-command and test command ran
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          ls -la "$GITHUB_WORKSPACE/install-test"
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: expected success"
+            exit 1
+          fi
+          if [ ! -f "$GITHUB_WORKSPACE/install-test/installed.marker" ]; then
+            echo "FAIL: custom install command did not run"
+            exit 1
+          fi
+          if [ ! -f "$GITHUB_WORKSPACE/install-test/tests-ran.marker" ]; then
+            echo "FAIL: test command did not run"
+            exit 1
+          fi
+          echo "PASS"
+      - name: Assert install exported env vars
+        run: |
+          echo "CI=$CI npm_config_cache=$npm_config_cache"
+          if [ "$CI" != "1" ] && [ "$CI" != "true" ]; then
+            echo "FAIL: CI not exported"
+            exit 1
+          fi
+          if [ -z "$npm_config_cache" ]; then
+            echo "FAIL: npm_config_cache not exported"
+            exit 1
+          fi
+          echo "PASS"

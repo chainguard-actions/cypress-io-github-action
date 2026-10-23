@@ -1,0 +1,84 @@
+name: Test command-prefix builds cypress run CLI with all flags
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Install fake npx that records its arguments
+        run: |
+          mkdir -p "$RUNNER_TEMP/fakebin"
+          rm -f "$RUNNER_TEMP/npx-args.txt"
+          cat > "$RUNNER_TEMP/fakebin/npx" <<EOF
+          #!/bin/sh
+          for a in "\$@"; do printf '%s\n' "\$a"; done > "$RUNNER_TEMP/npx-args.txt"
+          exit 0
+          EOF
+          chmod +x "$RUNNER_TEMP/fakebin/npx"
+          echo "$RUNNER_TEMP/fakebin" >> "$GITHUB_PATH"
+      - id: action
+        uses: .
+        with:
+          install: false
+          command-prefix: myprefix --flag
+          headed: true
+          parallel: true
+          quiet: true
+          group: my-group
+          tag: tag1,tag2
+          config: baseUrl=http://localhost:8080
+          spec: |
+            cypress/e2e/a.cy.js
+            cypress/e2e/b.cy.js
+          project: ./my-project
+          auto-cancel-after-failures: "3"
+          ci-build-id: build-123
+          browser: chrome
+          env: foo=bar
+          expose: pub=1
+      - name: Assert fake npx received expected arguments
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: expected success"
+            exit 1
+          fi
+          f="$RUNNER_TEMP/npx-args.txt"
+          if [ ! -f "$f" ]; then
+            echo "FAIL: fake npx was not invoked"
+            exit 1
+          fi
+          echo "--- args ---"
+          cat "$f"
+          ARGS="$(tr '\n' ' ' < "$f")"
+          echo "joined: $ARGS"
+          case "$ARGS" in
+            "myprefix --flag cypress run "*) ;;
+            *) echo "FAIL: command did not start with prefix + cypress run"; exit 1 ;;
+          esac
+          for expected in \
+            "--headed" "--parallel" "--quiet" \
+            "--group my-group" "--tag tag1,tag2" \
+            "--config baseUrl=http://localhost:8080" \
+            "--spec cypress/e2e/a.cy.js,cypress/e2e/b.cy.js" \
+            "--project ./my-project" \
+            "--auto-cancel-after-failures 3" \
+            "--ci-build-id build-123" \
+            "--browser chrome" "--env foo=bar" "--expose pub=1"; do
+            case " $ARGS" in
+              *" $expected "*) echo "ok: $expected" ;;
+              *) echo "FAIL: missing '$expected'"; exit 1 ;;
+            esac
+          done
+          if grep -qx -- "--record" "$f"; then
+            echo "FAIL: --record should not be present"
+            exit 1
+          fi
+          if grep -qx -- "--component" "$f"; then
+            echo "FAIL: --component should not be present"
+            exit 1
+          fi
+          echo "PASS"
