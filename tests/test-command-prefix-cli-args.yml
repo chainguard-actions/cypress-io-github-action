@@ -1,0 +1,96 @@
+name: Test command-prefix builds cypress run CLI args from inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Install fake npx that records its arguments
+        run: |
+          FAKE_DIR="${{ runner.temp }}/fake-npx-bin"
+          mkdir -p "$FAKE_DIR"
+          rm -f "${{ runner.temp }}/npx-args.txt"
+          cat > "$FAKE_DIR/npx" <<'EOF'
+          #!/usr/bin/env bash
+          : > "$NPX_ARGS_FILE"
+          for a in "$@"; do
+            printf '%s\n' "$a" >> "$NPX_ARGS_FILE"
+          done
+          echo "fake npx called with: $*"
+          exit 0
+          EOF
+          chmod +x "$FAKE_DIR/npx"
+          echo "$FAKE_DIR" >> "$GITHUB_PATH"
+      - id: action
+        uses: .
+        env:
+          NPX_ARGS_FILE: ${{ runner.temp }}/npx-args.txt
+          # pre-set PR info so the action does not query the GitHub API
+          CYPRESS_PULL_REQUEST_ID: '1'
+          CYPRESS_PULL_REQUEST_URL: https://example.com/pull/1
+        with:
+          install: false
+          command-prefix: --no-install
+          headed: true
+          parallel: true
+          quiet: true
+          group: grp1
+          tag: t1,t2
+          config: video=false
+          spec: |
+            cypress/e2e/a.cy.js
+            cypress/e2e/b.cy.js
+          project: ./proj
+          auto-cancel-after-failures: '3'
+          ci-build-id: build-123
+          browser: chrome
+          env: foo=bar
+          expose: api=public
+      - name: Assert CLI arguments
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: expected success"
+            exit 1
+          fi
+          ARGS="${{ runner.temp }}/npx-args.txt"
+          if [ ! -f "$ARGS" ]; then
+            echo "FAIL: fake npx was not invoked"
+            exit 1
+          fi
+          echo "--- recorded args ---"
+          cat "$ARGS"
+          JOINED="$(tr '\n' ' ' < "$ARGS")"
+          echo "joined: $JOINED"
+          check() {
+            if ! printf ' %s' "$JOINED" | grep -qF -- " $1 "; then
+              echo "FAIL: expected '$1' in args"
+              exit 1
+            fi
+          }
+          check "--no-install cypress run"
+          check "--headed"
+          check "--parallel"
+          check "--quiet"
+          check "--group grp1"
+          check "--tag t1,t2"
+          check "--config video=false"
+          check "--spec cypress/e2e/a.cy.js,cypress/e2e/b.cy.js"
+          check "--project ./proj"
+          check "--auto-cancel-after-failures 3"
+          check "--ci-build-id build-123"
+          check "--browser chrome"
+          check "--env foo=bar"
+          check "--expose api=public"
+          if grep -qx -- "--record" "$ARGS"; then
+            echo "FAIL: --record should not be passed"
+            exit 1
+          fi
+          if grep -qx -- "--component" "$ARGS"; then
+            echo "FAIL: --component should not be passed"
+            exit 1
+          fi
+          echo "PASS"

@@ -1,0 +1,43 @@
+name: Test runTests false skips the test command
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Reset marker
+        run: rm -f "${{ runner.temp }}/marker.txt"
+      - id: action
+        uses: .
+        env:
+          MARKER_FILE: ${{ runner.temp }}/marker.txt
+        with:
+          install: false
+          runTests: false
+          build: bash tests/fixtures/scripts/write-marker.sh build
+          command: bash tests/fixtures/scripts/write-marker.sh custom-command
+      - name: Assert build ran but tests were skipped
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: expected success"
+            exit 1
+          fi
+          MARKER="${{ runner.temp }}/marker.txt"
+          if [ ! -f "$MARKER" ]; then
+            echo "FAIL: marker file missing; build command did not run"
+            exit 1
+          fi
+          cat "$MARKER"
+          if ! grep -q "^build " "$MARKER"; then
+            echo "FAIL: build command did not run"
+            exit 1
+          fi
+          if grep -q "^custom-command " "$MARKER"; then
+            echo "FAIL: test command ran although runTests is false"
+            exit 1
+          fi
+          echo "PASS"

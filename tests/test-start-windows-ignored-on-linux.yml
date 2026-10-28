@@ -1,0 +1,43 @@
+name: Test start-windows is ignored on Linux and summary-title with custom command
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Reset marker
+        run: rm -f "${{ runner.temp }}/marker.txt"
+      - id: action
+        uses: .
+        env:
+          MARKER_FILE: ${{ runner.temp }}/marker.txt
+        with:
+          install: false
+          start-windows: bash tests/fixtures/scripts/write-marker.sh start-windows
+          summary-title: My Custom Title
+          command: bash tests/fixtures/scripts/write-marker.sh custom-command
+      - name: Assert command ran and start-windows did not
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: expected success"
+            exit 1
+          fi
+          MARKER="${{ runner.temp }}/marker.txt"
+          if [ ! -f "$MARKER" ]; then
+            echo "FAIL: marker missing; custom command did not run"
+            exit 1
+          fi
+          cat "$MARKER"
+          if ! grep -q "^custom-command " "$MARKER"; then
+            echo "FAIL: custom command did not run"
+            exit 1
+          fi
+          if grep -q "^start-windows " "$MARKER"; then
+            echo "FAIL: start-windows command ran on Linux"
+            exit 1
+          fi
+          echo "PASS"

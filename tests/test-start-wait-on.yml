@@ -1,0 +1,36 @@
+name: Test start server and wait-on URL before command
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Reset marker
+        run: rm -f "${{ runner.temp }}/marker.txt"
+      - id: action
+        uses: .
+        env:
+          MARKER_FILE: ${{ runner.temp }}/marker.txt
+        with:
+          install: false
+          start: node tests/fixtures/scripts/server.js 8787
+          wait-on: http://127.0.0.1:8787
+          wait-on-timeout: 60
+          command: bash tests/fixtures/scripts/write-marker.sh after-wait
+      - name: Assert command ran after server was reachable
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: expected success"
+            exit 1
+          fi
+          MARKER="${{ runner.temp }}/marker.txt"
+          if [ ! -f "$MARKER" ] || ! grep -q "^after-wait " "$MARKER"; then
+            echo "FAIL: command did not run after wait-on"
+            exit 1
+          fi
+          cat "$MARKER"
+          echo "PASS"

@@ -1,0 +1,46 @@
+name: Test custom cache-key with package manager caching enabled
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Reset marker
+        run: rm -f "${{ runner.temp }}/marker.txt"
+      - id: action
+        uses: .
+        env:
+          MARKER_FILE: ${{ runner.temp }}/marker.txt
+          # skip Cypress binary list/verify/cache since no Cypress is installed
+          CYPRESS_INSTALL_BINARY: '0'
+        with:
+          working-directory: tests/fixtures/npm-project
+          package-manager-cache: true
+          cache-key: my-custom-cache-key-v1
+          install-command: bash ../scripts/write-marker.sh install
+          command: bash ../scripts/write-marker.sh custom-command
+      - name: Assert install and command ran
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: expected success"
+            exit 1
+          fi
+          MARKER="${{ runner.temp }}/marker.txt"
+          if [ ! -f "$MARKER" ]; then
+            echo "FAIL: marker missing"
+            exit 1
+          fi
+          cat "$MARKER"
+          if ! grep -qE "^install .*/tests/fixtures/npm-project$" "$MARKER"; then
+            echo "FAIL: install command did not run"
+            exit 1
+          fi
+          if ! grep -qE "^custom-command .*/tests/fixtures/npm-project$" "$MARKER"; then
+            echo "FAIL: test command did not run"
+            exit 1
+          fi
+          echo "PASS"

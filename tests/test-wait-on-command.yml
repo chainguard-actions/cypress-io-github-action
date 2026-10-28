@@ -1,0 +1,40 @@
+name: Test wait-on with a non-URL command
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Reset marker
+        run: rm -f "${{ runner.temp }}/marker.txt"
+      - id: action
+        uses: .
+        env:
+          MARKER_FILE: ${{ runner.temp }}/marker.txt
+        with:
+          install: false
+          wait-on: bash tests/fixtures/scripts/write-marker.sh wait-command
+          command: bash tests/fixtures/scripts/write-marker.sh custom-command
+      - name: Assert wait-on command ran before test command
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: expected success"
+            exit 1
+          fi
+          MARKER="${{ runner.temp }}/marker.txt"
+          if [ ! -f "$MARKER" ]; then
+            echo "FAIL: marker missing"
+            exit 1
+          fi
+          cat "$MARKER"
+          FIRST="$(sed -n 1p "$MARKER" | cut -d' ' -f1)"
+          SECOND="$(sed -n 2p "$MARKER" | cut -d' ' -f1)"
+          if [ "$FIRST" != "wait-command" ] || [ "$SECOND" != "custom-command" ]; then
+            echo "FAIL: expected wait-command then custom-command, got '$FIRST' then '$SECOND'"
+            exit 1
+          fi
+          echo "PASS"

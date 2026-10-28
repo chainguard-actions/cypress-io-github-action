@@ -1,0 +1,6 @@
+allowBuilds:
+  cypress: true
+sideEffectsCache: false
+minimumReleaseAge: 10080 # 10,080 minutes = 7 days
+minimumReleaseAgeExclude:
+  - cypress

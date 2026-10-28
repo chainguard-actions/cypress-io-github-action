@@ -1,0 +1,7 @@
+{
+  "name": "start-and-pnpm-workspaces",
+  "version": "1.0.0",
+  "description": "example using pnpm with workspaces",
+  "type": "module",
+  "private": true
+}
