@@ -17,6 +17,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 | v7.4.5 | [`v7.4.5`](https://github.com/chainguard-actions/cypress-io-github-action/tree/v7.4.5) | [`789d836`](https://github.com/cypress-io/github-action/commit/789d836053c5ca389c2905fc0c9f2909da778c46) | [`HARDENING.md`](https://github.com/chainguard-actions/cypress-io-github-action/blob/v7.4.5/HARDENING.md) |
 | v7.4.6 | [`v7.4.6`](https://github.com/chainguard-actions/cypress-io-github-action/tree/v7.4.6) | [`c541a95`](https://github.com/cypress-io/github-action/commit/c541a95ea92d9239347a2355f2e895cd4b3f8060) | [`HARDENING.md`](https://github.com/chainguard-actions/cypress-io-github-action/blob/v7.4.6/HARDENING.md) |
 | v7.4.7 | [`v7.4.7`](https://github.com/chainguard-actions/cypress-io-github-action/tree/v7.4.7) | [`bc982da`](https://github.com/cypress-io/github-action/commit/bc982daf1fc26474fa0cf2c355d6c910616ce411) | [`HARDENING.md`](https://github.com/chainguard-actions/cypress-io-github-action/blob/v7.4.7/HARDENING.md) |
+| v7.4.8 | [`v7.4.8`](https://github.com/chainguard-actions/cypress-io-github-action/tree/v7.4.8) | [`4ce68f2`](https://github.com/cypress-io/github-action/commit/4ce68f262a3888d22cf3175d62010a145ba737ee) | [`HARDENING.md`](https://github.com/chainguard-actions/cypress-io-github-action/blob/v7.4.8/HARDENING.md) |
 
 ## Privacy
 
