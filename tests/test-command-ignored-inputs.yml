@@ -1,0 +1,50 @@
+name: Test custom command ignores start-windows on Linux and summary-title/cache-key
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Prepare working directory
+        run: |
+          D="$GITHUB_WORKSPACE/cypress-ignored"
+          rm -rf "$D"
+          mkdir -p "$D"
+          cat > "$D/tests.sh" <<'EOF'
+          #!/bin/bash
+          echo "ran" > tests-ran.txt
+          EOF
+          cat > "$D/win-start.sh" <<'EOF'
+          #!/bin/bash
+          echo "windows start ran" > win-start-ran.txt
+          EOF
+      - id: action
+        uses: .
+        with:
+          install: false
+          working-directory: cypress-ignored
+          cache-key: my-custom-cache-key
+          start-windows: bash win-start.sh
+          summary-title: My Custom Summary
+          command: bash tests.sh
+      - name: Assert custom command ran and windows start was ignored
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          D="$GITHUB_WORKSPACE/cypress-ignored"
+          echo "outcome: $OUTCOME"
+          ls -la "$D"
+          if [ "$OUTCOME" != "success" ]; then
+            echo "FAIL: expected success"
+            exit 1
+          fi
+          if [ ! -f "$D/tests-ran.txt" ]; then
+            echo "FAIL: custom command did not run"
+            exit 1
+          fi
+          if [ -f "$D/win-start-ran.txt" ]; then
+            echo "FAIL: start-windows ran on Linux"
+            exit 1
+          fi
+          echo "PASS"

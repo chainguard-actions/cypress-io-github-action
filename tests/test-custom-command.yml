@@ -1,0 +1,55 @@
+name: Test custom command with install disabled
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Prepare working directory
+        run: |
+          rm -rf "$GITHUB_WORKSPACE/cypress-work"
+          mkdir -p "$GITHUB_WORKSPACE/cypress-work"
+          cat > "$GITHUB_WORKSPACE/cypress-work/record.sh" <<'EOF'
+          #!/bin/bash
+          echo "ran" > cypress-ran.txt
+          echo "$TERM" > term.txt
+          echo "$CYPRESS_CACHE_FOLDER" > cache-folder.txt
+          pwd > pwd.txt
+          echo "args:$*" > args.txt
+          EOF
+      - id: action
+        uses: .
+        with:
+          install: false
+          working-directory: cypress-work
+          command: bash record.sh hello world
+      - name: Assert custom command ran in working directory
+        run: |
+          D="$GITHUB_WORKSPACE/cypress-work"
+          ls -la "$D"
+          if [ ! -f "$D/cypress-ran.txt" ]; then
+            echo "FAIL: custom command did not run"
+            exit 1
+          fi
+          echo "pwd: $(cat "$D/pwd.txt")"
+          case "$(cat "$D/pwd.txt")" in
+            */cypress-work) ;;
+            *) echo "FAIL: command did not run in working-directory"; exit 1 ;;
+          esac
+          echo "args: $(cat "$D/args.txt")"
+          if [ "$(cat "$D/args.txt")" != "args:hello world" ]; then
+            echo "FAIL: arguments not passed correctly"
+            exit 1
+          fi
+          echo "TERM: $(cat "$D/term.txt")"
+          if [ "$(cat "$D/term.txt")" != "xterm" ]; then
+            echo "FAIL: expected TERM=xterm exported by the action"
+            exit 1
+          fi
+          echo "CYPRESS_CACHE_FOLDER: $(cat "$D/cache-folder.txt")"
+          if [ -z "$(tr -d '[:space:]' < "$D/cache-folder.txt")" ]; then
+            echo "FAIL: CYPRESS_CACHE_FOLDER not exported"
+            exit 1
+          fi
+          echo "PASS"

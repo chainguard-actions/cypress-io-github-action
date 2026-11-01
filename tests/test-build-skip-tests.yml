@@ -1,0 +1,41 @@
+name: Test build runs and tests are skipped when runTests is false
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Prepare working directory
+        run: |
+          rm -rf "$GITHUB_WORKSPACE/cypress-build"
+          mkdir -p "$GITHUB_WORKSPACE/cypress-build"
+          cat > "$GITHUB_WORKSPACE/cypress-build/build.sh" <<'EOF'
+          #!/bin/bash
+          echo "built" > build-ran.txt
+          EOF
+          cat > "$GITHUB_WORKSPACE/cypress-build/tests.sh" <<'EOF'
+          #!/bin/bash
+          echo "should not run" > tests-ran.txt
+          EOF
+      - id: action
+        uses: .
+        with:
+          install: false
+          runTests: false
+          working-directory: cypress-build
+          build: bash build.sh
+          command: bash tests.sh
+      - name: Assert build ran and tests were skipped
+        run: |
+          D="$GITHUB_WORKSPACE/cypress-build"
+          ls -la "$D"
+          if [ ! -f "$D/build-ran.txt" ]; then
+            echo "FAIL: build command did not run"
+            exit 1
+          fi
+          if [ -f "$D/tests-ran.txt" ]; then
+            echo "FAIL: test command ran although runTests is false"
+            exit 1
+          fi
+          echo "PASS"

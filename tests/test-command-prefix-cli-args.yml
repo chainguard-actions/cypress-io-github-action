@@ -1,0 +1,83 @@
+name: Test command-prefix builds full cypress CLI arguments
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Prepare working directory with fake prefix binary
+        run: |
+          D="$GITHUB_WORKSPACE/cypress-cli"
+          rm -rf "$D"
+          mkdir -p "$D/node_modules/.bin"
+          echo '{"name":"cypress-cli-test","version":"1.0.0","private":true}' > "$D/package.json"
+          cat > "$D/node_modules/.bin/fakeprefix" <<'EOF'
+          #!/bin/bash
+          : > args.txt
+          for a in "$@"; do
+            printf '%s\n' "$a" >> args.txt
+          done
+          EOF
+          chmod +x "$D/node_modules/.bin/fakeprefix"
+      - id: action
+        uses: .
+        with:
+          install: false
+          working-directory: cypress-cli
+          command-prefix: fakeprefix
+          headed: true
+          parallel: true
+          quiet: true
+          group: my-group
+          tag: tag1,tag2
+          ci-build-id: build-123
+          config: video=false
+          spec: |
+            cypress/e2e/a.cy.js
+            cypress/e2e/b.cy.js
+          project: ./my-project
+          auto-cancel-after-failures: '3'
+          browser: chrome
+          env: foo=bar
+          expose: pub=1
+      - name: Assert CLI arguments
+        run: |
+          F="$GITHUB_WORKSPACE/cypress-cli/args.txt"
+          if [ ! -f "$F" ]; then
+            echo "FAIL: prefix command did not run"
+            exit 1
+          fi
+          echo "--- args ---"
+          cat "$F"
+          ARGS="$(tr '\n' ' ' < "$F")"
+          echo "joined: $ARGS"
+          check() {
+            if ! printf '%s' " $ARGS" | grep -qF -- " $1 "; then
+              echo "FAIL: expected '$1' in args"
+              exit 1
+            fi
+          }
+          check "cypress run"
+          check "--headed"
+          check "--parallel"
+          check "--quiet"
+          check "--group my-group"
+          check "--tag tag1,tag2"
+          check "--ci-build-id build-123"
+          check "--config video=false"
+          check "--spec cypress/e2e/a.cy.js,cypress/e2e/b.cy.js"
+          check "--project ./my-project"
+          check "--auto-cancel-after-failures 3"
+          check "--browser chrome"
+          check "--env foo=bar"
+          check "--expose pub=1"
+          if grep -qx -- "--record" "$F"; then
+            echo "FAIL: --record should not be present"
+            exit 1
+          fi
+          if grep -qx -- "--component" "$F"; then
+            echo "FAIL: --component should not be present"
+            exit 1
+          fi
+          echo "PASS"

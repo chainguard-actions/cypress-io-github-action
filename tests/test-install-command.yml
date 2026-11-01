@@ -1,0 +1,58 @@
+name: Test custom install command
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      # skip Cypress binary list/verify/cache steps (no binary installed)
+      CYPRESS_INSTALL_BINARY: "0"
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Prepare working directory with a lockfile
+        run: |
+          D="$GITHUB_WORKSPACE/cypress-install"
+          rm -rf "$D"
+          mkdir -p "$D"
+          echo '{"name":"cypress-install-test","version":"1.0.0","lockfileVersion":3,"requires":true,"packages":{}}' > "$D/package-lock.json"
+          echo '{"name":"cypress-install-test","version":"1.0.0"}' > "$D/package.json"
+          cat > "$D/install.sh" <<'EOF'
+          #!/bin/bash
+          echo "installed" > install-ran.txt
+          echo "$npm_config_cache" > npm-cache.txt
+          echo "$CI" > ci.txt
+          EOF
+          cat > "$D/tests.sh" <<'EOF'
+          #!/bin/bash
+          echo "tests" > tests-ran.txt
+          EOF
+      - id: action
+        uses: .
+        with:
+          working-directory: cypress-install
+          install-command: bash install.sh
+          package-manager-cache: false
+          command: bash tests.sh
+      - name: Assert install command and tests ran
+        run: |
+          D="$GITHUB_WORKSPACE/cypress-install"
+          ls -la "$D"
+          if [ ! -f "$D/install-ran.txt" ]; then
+            echo "FAIL: custom install command did not run"
+            exit 1
+          fi
+          echo "CI: $(cat "$D/ci.txt")"
+          if [ "$(cat "$D/ci.txt")" != "1" ]; then
+            echo "FAIL: expected CI=1 exported during install"
+            exit 1
+          fi
+          echo "npm_config_cache: $(cat "$D/npm-cache.txt")"
+          case "$(cat "$D/npm-cache.txt")" in
+            */.npm) ;;
+            *) echo "FAIL: npm_config_cache not set to ~/.npm"; exit 1 ;;
+          esac
+          if [ ! -f "$D/tests-ran.txt" ]; then
+            echo "FAIL: test command did not run after install"
+            exit 1
+          fi
+          echo "PASS"

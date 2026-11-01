@@ -1,0 +1,49 @@
+name: Test start server and wait-on URL
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Prepare working directory
+        run: |
+          D="$GITHUB_WORKSPACE/cypress-server"
+          rm -rf "$D"
+          mkdir -p "$D"
+          cat > "$D/server.js" <<'EOF'
+          const http = require('http')
+          http.createServer((req, res) => { res.end('ok') }).listen(31337)
+          setTimeout(() => process.exit(0), 120000)
+          EOF
+          cat > "$D/check.js" <<'EOF'
+          const http = require('http')
+          const fs = require('fs')
+          http.get('http://localhost:31337', (res) => {
+            let body = ''
+            res.on('data', (c) => { body += c })
+            res.on('end', () => { fs.writeFileSync('server-response.txt', body); process.exit(0) })
+          }).on('error', (e) => { console.error(e); process.exit(1) })
+          EOF
+      - id: action
+        uses: .
+        with:
+          install: false
+          working-directory: cypress-server
+          start: node server.js
+          wait-on: http://localhost:31337
+          wait-on-timeout: 60
+          command: node check.js
+      - name: Assert server was reachable from the test command
+        run: |
+          F="$GITHUB_WORKSPACE/cypress-server/server-response.txt"
+          if [ ! -f "$F" ]; then
+            echo "FAIL: test command did not record the server response"
+            exit 1
+          fi
+          echo "response: $(cat "$F")"
+          if [ "$(cat "$F")" != "ok" ]; then
+            echo "FAIL: expected 'ok'"
+            exit 1
+          fi
+          echo "PASS"
