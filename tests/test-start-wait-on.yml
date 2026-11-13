@@ -1,0 +1,32 @@
+name: Test start server and wait-on URL before running command
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Clean markers
+        run: rm -rf /tmp/cypress-markers
+      - id: action
+        uses: .
+        with:
+          install: false
+          start: node tests/fixtures/server.js
+          wait-on: http://localhost:8765
+          wait-on-timeout: 60
+          command: bash tests/fixtures/check-server.sh
+      - name: Assert server was reachable when command ran
+        run: |
+          f=/tmp/cypress-markers/served
+          if [ ! -f "$f" ]; then
+            echo "FAIL: served marker not found"
+            exit 1
+          fi
+          ACTUAL="$(cat "$f")"
+          echo "actual: $ACTUAL"
+          if [ "$ACTUAL" != "cypress-fixture-ok" ]; then
+            echo "FAIL: expected 'cypress-fixture-ok'"
+            exit 1
+          fi
+          echo "PASS"

@@ -1,0 +1,91 @@
+name: Test command-prefix builds cypress run CLI args from inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Prepare working directory with a local bin shim
+        run: |
+          rm -rf /tmp/cypress-markers
+          rm -rf "$GITHUB_WORKSPACE/prefix-wd"
+          mkdir -p "$GITHUB_WORKSPACE/prefix-wd/node_modules/.bin"
+          echo '{"name":"prefix-wd","version":"1.0.0","private":true}' > "$GITHUB_WORKSPACE/prefix-wd/package.json"
+          cat > "$GITHUB_WORKSPACE/prefix-wd/node_modules/.bin/prefix-marker" <<'EOF'
+          #!/usr/bin/env bash
+          mkdir -p /tmp/cypress-markers
+          {
+            echo "pwd=$(pwd)"
+            for a in "$@"; do echo "arg=$a"; done
+          } > /tmp/cypress-markers/prefix-ran
+          echo "prefix marker written"
+          EOF
+          chmod +x "$GITHUB_WORKSPACE/prefix-wd/node_modules/.bin/prefix-marker"
+      - id: action
+        uses: .
+        env:
+          NPM_CONFIG_YES: "true"
+        with:
+          install: false
+          working-directory: prefix-wd
+          command-prefix: prefix-marker
+          headed: true
+          quiet: true
+          parallel: true
+          group: grp1
+          tag: tag1
+          ci-build-id: build-123
+          config: video=false
+          spec: cypress/e2e/a.cy.js
+          project: ./proj
+          auto-cancel-after-failures: 3
+          env: foo=bar
+          expose: pub=1
+      - name: Assert CLI arguments were built from inputs
+        run: |
+          f=/tmp/cypress-markers/prefix-ran
+          if [ ! -f "$f" ]; then
+            echo "FAIL: prefix marker not found"
+            exit 1
+          fi
+          cat "$f"
+          fail=0
+          check_pair() {
+            # assert that line "arg=$1" is immediately followed by "arg=$2"
+            if ! grep -A1 -x -- "arg=$1" "$f" | grep -qx -- "arg=$2"; then
+              echo "FAIL: expected '$1 $2'"
+              fail=1
+            fi
+          }
+          check_flag() {
+            if ! grep -qx -- "arg=$1" "$f"; then
+              echo "FAIL: expected flag '$1'"
+              fail=1
+            fi
+          }
+          check_pair cypress run
+          check_flag --headed
+          check_flag --parallel
+          check_flag --quiet
+          check_pair --group grp1
+          check_pair --tag tag1
+          check_pair --config video=false
+          check_pair --spec cypress/e2e/a.cy.js
+          check_pair --project ./proj
+          check_pair --auto-cancel-after-failures 3
+          check_pair --ci-build-id build-123
+          check_pair --env foo=bar
+          check_pair --expose pub=1
+          if grep -qx -- "arg=--record" "$f"; then
+            echo "FAIL: --record should not be passed when record is false"
+            fail=1
+          fi
+          if ! grep -qx "pwd=$GITHUB_WORKSPACE/prefix-wd" "$f"; then
+            echo "FAIL: expected cwd $GITHUB_WORKSPACE/prefix-wd"
+            fail=1
+          fi
+          if [ "$fail" -ne 0 ]; then
+            exit 1
+          fi
+          echo "PASS"

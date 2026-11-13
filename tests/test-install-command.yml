@@ -1,0 +1,37 @@
+name: Test custom install-command
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      # skip Cypress binary list/verify since no real Cypress is installed
+      CYPRESS_INSTALL_BINARY: '0'
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Clean markers
+        run: rm -rf /tmp/cypress-markers
+      - id: action
+        uses: .
+        with:
+          working-directory: tests/fixtures/app
+          install-command: bash ../write-marker.sh install-ran custom
+          package-manager-cache: false
+          runTests: false
+      - name: Assert custom install command ran in working-directory
+        run: |
+          f=/tmp/cypress-markers/install-ran
+          if [ ! -f "$f" ]; then
+            echo "FAIL: install marker not found"
+            exit 1
+          fi
+          cat "$f"
+          if ! grep -q "args=install-ran custom" "$f"; then
+            echo "FAIL: install args not passed"
+            exit 1
+          fi
+          if ! grep -qx "pwd=$GITHUB_WORKSPACE/tests/fixtures/app" "$f"; then
+            echo "FAIL: expected cwd $GITHUB_WORKSPACE/tests/fixtures/app"
+            exit 1
+          fi
+          echo "PASS"

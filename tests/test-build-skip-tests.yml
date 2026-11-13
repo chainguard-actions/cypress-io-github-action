@@ -1,0 +1,39 @@
+name: Test build command with install and tests skipped
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Clean markers
+        run: rm -rf /tmp/cypress-markers
+      - id: action
+        uses: .
+        with:
+          install: false
+          runTests: false
+          build: bash tests/fixtures/write-marker.sh build-ran alpha beta
+      - name: Assert build command ran
+        run: |
+          f=/tmp/cypress-markers/build-ran
+          if [ ! -f "$f" ]; then
+            echo "FAIL: build marker not found"
+            exit 1
+          fi
+          cat "$f"
+          if ! grep -q "args=build-ran alpha beta" "$f"; then
+            echo "FAIL: build args not passed correctly"
+            exit 1
+          fi
+          echo "PASS"
+      - name: Assert no results URL when tests are skipped
+        env:
+          ACTUAL: ${{ steps.action.outputs.resultsUrl }}
+        run: |
+          echo "actual: '$ACTUAL'"
+          if [ -n "$ACTUAL" ]; then
+            echo "FAIL: expected empty resultsUrl"
+            exit 1
+          fi
+          echo "PASS"

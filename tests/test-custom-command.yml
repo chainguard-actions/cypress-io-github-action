@@ -1,0 +1,34 @@
+name: Test custom command overrides cypress run
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Clean markers
+        run: rm -rf /tmp/cypress-markers
+      - id: action
+        uses: .
+        with:
+          install: false
+          command: bash tests/fixtures/write-marker.sh command-ran hello world
+          # ignored when command is set (should only produce a warning)
+          browser: chrome
+      - name: Assert custom command ran from workspace root
+        run: |
+          f=/tmp/cypress-markers/command-ran
+          if [ ! -f "$f" ]; then
+            echo "FAIL: command marker not found"
+            exit 1
+          fi
+          cat "$f"
+          if ! grep -q "args=command-ran hello world" "$f"; then
+            echo "FAIL: command args not passed correctly"
+            exit 1
+          fi
+          if ! grep -qx "pwd=$GITHUB_WORKSPACE" "$f"; then
+            echo "FAIL: expected command to run in $GITHUB_WORKSPACE"
+            exit 1
+          fi
+          echo "PASS"

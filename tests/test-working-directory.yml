@@ -1,0 +1,29 @@
+name: Test working-directory is used as cwd for commands
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Clean markers
+        run: rm -rf /tmp/cypress-markers
+      - id: action
+        uses: .
+        with:
+          install: false
+          working-directory: tests/fixtures/app
+          command: bash ../write-marker.sh wd-ran
+      - name: Assert command ran inside working-directory
+        run: |
+          f=/tmp/cypress-markers/wd-ran
+          if [ ! -f "$f" ]; then
+            echo "FAIL: marker not found"
+            exit 1
+          fi
+          cat "$f"
+          if ! grep -qx "pwd=$GITHUB_WORKSPACE/tests/fixtures/app" "$f"; then
+            echo "FAIL: expected cwd $GITHUB_WORKSPACE/tests/fixtures/app"
+            exit 1
+          fi
+          echo "PASS"

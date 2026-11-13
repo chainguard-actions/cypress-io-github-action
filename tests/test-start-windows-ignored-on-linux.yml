@@ -1,0 +1,32 @@
+name: Test start-windows is ignored on Linux and extra inputs are tolerated
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Clean markers
+        run: rm -rf /tmp/cypress-markers
+      - id: action
+        uses: .
+        with:
+          install: false
+          cache-key: my-custom-cache-key
+          summary-title: My Custom Summary
+          start: bash tests/fixtures/write-marker.sh start-linux
+          start-windows: bash tests/fixtures/write-marker.sh start-windows
+          command: sleep 3
+      - name: Assert Linux start command ran and Windows one did not
+        run: |
+          ls -la /tmp/cypress-markers || true
+          if [ ! -f /tmp/cypress-markers/start-linux ]; then
+            echo "FAIL: start (linux) marker not found"
+            exit 1
+          fi
+          cat /tmp/cypress-markers/start-linux
+          if [ -f /tmp/cypress-markers/start-windows ]; then
+            echo "FAIL: start-windows command should not run on Linux"
+            exit 1
+          fi
+          echo "PASS"
